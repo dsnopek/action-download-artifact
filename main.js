@@ -113,7 +113,7 @@ async function main() {
         core.info(`==> Allow forks: ${allowForks}`)
 
         if (!runID) {
-            const runGetter = workflow ? client.rest.actions.listWorkflowRuns : client.rest.actions.listWorkflowRunsForRepo
+            const runGetter = client.rest.actions.listWorkflowRunsForRepo
             // Filtered queries are served by a search index that intermittently returns a random subset of runs,
             // so merge in the latest unfiltered runs, matched locally. Only helps if the newest match is among them.
             let latestRuns = []
