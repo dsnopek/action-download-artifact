@@ -33,6 +33,7 @@ async function main() {
         let checkArtifacts = core.getBooleanInput("check_artifacts")
         let searchArtifacts = core.getBooleanInput("search_artifacts")
         const allowForks = core.getBooleanInput("allow_forks")
+        let ensureLatest = core.getBooleanInput("ensure_latest")
         let dryRun = core.getBooleanInput("dry_run")
 
         const client = github.getOctokit(token)
@@ -146,6 +147,7 @@ async function main() {
                 }
                 latestRuns = []
                 // Do not rely on the API returning runs in most recent first order, it sometimes does not.
+                let foundRun = null
                 for (const run of [...runs.data, ...missingRuns].sort((a, b) => b.id - a.id)) {
                     if (runNumber && run.run_number != runNumber) {
                         continue
@@ -170,17 +172,24 @@ async function main() {
                         }
                     }
 
-                    runID = run.id
-                    core.info(`==> (found) Run ID: ${runID}`)
-                    core.info(`==> (found) Run date: ${run.created_at}`)
-
-                    if (!workflow) {
-                        workflow = run.workflow_id
-                        core.info(`==> (found) Workflow: ${workflow}`)
+                    if (ensureLatest) {
+                        if (!foundRun || new Date(run.created_at) > new Date(foundRun.created_at)) {
+                            foundRun = run
+                        }
+                        continue
                     }
+                    foundRun = run
                     break
                 }
-                if (runID) {
+                if (foundRun) {
+                    runID = foundRun.id
+                    core.info(`==> (found) Run ID: ${runID}`)
+                    core.info(`==> (found) Run date: ${foundRun.created_at}`)
+
+                    if (!workflow) {
+                        workflow = foundRun.workflow_id
+                        core.info(`==> (found) Workflow: ${workflow}`)
+                    }
                     break
                 }
             }

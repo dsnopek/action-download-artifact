@@ -59,6 +59,10 @@ inputs:
   search_artifacts:
     description: Search workflow runs for artifact with specified name
     default: false
+  ensure_latest:
+    description: Ensures that we are using the latest available artifact
+    required: false
+    default: false
   skip_unpack:
     description: Choose to skip unpacking the downloaded artifact(s)
     default: false
